@@ -1,0 +1,24 @@
+{
+  "data": [
+    {
+      "type": "todo",
+      "title": "To do",
+      "list": []
+    },
+    {
+      "type": "progress",
+      "title": "In Progress",
+      "list": []
+    },
+    {
+      "type": "done",
+      "title": "Done",
+      "list": []
+    },
+    {
+      "type": "prod",
+      "title": "Prod",
+      "list": []
+    }
+  ]
+}
