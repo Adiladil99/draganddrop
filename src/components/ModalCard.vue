@@ -11,8 +11,11 @@
               />
             </div>
             <div v-if="data">
-              <img :src="require('@/assets/icons/edit.png')" />
-              <img :src="require('@/assets/icons/delete.png')" />
+              <img :src="require('@/assets/icons/edit.png')" @click="edit()" />
+              <img
+                :src="require('@/assets/icons/delete.png')"
+                @click="remove($emit)"
+              />
             </div>
           </div>
           <hr />
@@ -20,26 +23,36 @@
             <label>ID:</label>
             <input readonly placeholder="ID Card" v-model="id" type="text" />
             <label>Title:</label>
-            <input placeholder="Title" v-model="title" type="text" />
+            <input
+              name="input"
+              :readonly="readonly"
+              placeholder="Title"
+              v-model.trim="title"
+              type="text"
+            />
             <label>Description:</label>
             <textarea
+              name="textarea"
+              :readonly="readonly"
               placeholder="Description"
-              v-model="description"
+              v-model.trim="description"
               type="text"
             />
             <button
               class="modal-default-button"
-              @click="createItem()"
+              type="submit"
+              @click="createItem($emit)"
               v-if="!data"
             >
               Create
             </button>
             <div class="modal-buttons" v-else>
-              <button class="modal-default-button" @click="$emit('close')">
-                Редактировать
-              </button>
-              <button class="modal-default-button" @click="$emit('close')">
-                Удалить
+              <button
+                class="modal-default-button"
+                v-show="visible"
+                @click="update($emit)"
+              >
+                Edit
               </button>
             </div>
           </div>
@@ -61,8 +74,10 @@ export default {
   data() {
     return {
       id: this.data != undefined ? this.data.id : this.count,
-      title: this.data != undefined ? this.data.title : "",
-      description: this.data != undefined ? this.data.description : "",
+      title: this.data != undefined ? this.data.title : null,
+      description: this.data != undefined ? this.data.description : null,
+      visible: false,
+      readonly: this.data != undefined ? true : false,
     };
   },
   validations() {
@@ -72,16 +87,41 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({ count: "getCounter" }),
+    ...mapGetters({ count: "getCounter", datas: "getData" }),
   },
   methods: {
-    createItem() {
+    createItem($emit) {
       this.$store.dispatch("createItemToDo", {
         id: this.count,
         title: this.title,
         description: this.description,
       });
       this.$store.commit("setCounter");
+      $emit("close");
+    },
+    edit() {
+      this.visible = !this.visible;
+      this.readonly = !this.readonly;
+    },
+    remove($emit) {
+      this.datas.map((elem) => {
+        elem.list.forEach((byid, i) => {
+          if (this.id == byid.id) {
+            elem.list.splice(i, 1);
+          }
+        });
+      });
+      $emit("close");
+    },
+    update($emit) {
+      this.datas.map((elem) => {
+        elem.list.forEach((byid) => {
+          if (this.id == byid.id) {
+            (byid.title = this.title), (byid.description = this.description);
+          }
+        });
+      });
+      $emit("close");
     },
   },
   props: {
@@ -139,12 +179,20 @@ export default {
           padding: 0;
           height: 40px;
         }
+        input:read-only {
+          background-color: #f5f5f5;
+          border: none;
+        }
         textarea {
           margin-bottom: 15px;
           padding: 5px;
           height: 80px;
           resize: none;
           overflow-x: hidden;
+        }
+        textarea:focus,
+        input:focus {
+          outline: none;
         }
 
         .modal-default-button {

@@ -1,6 +1,5 @@
 {
-  "data": [
-    {
+  "data": [{
       "type": "todo",
       "title": "To do",
       "list": []
